@@ -7,13 +7,13 @@ function Scene(__cards) {
 	this.__centerCard = []; // 中间牌区
 	this.__pQueue = []; // 规则队列
 	this._splitCard();
-	this.processQueue();
+	this._processQueue();
 	this._setCardsPosition();
 	this._eventBind();
 }
 var sceneBegin = {
 	_splitCard: function() {
-		for (var i = 0; i < 3; i++) {
+		for (var i = 0; i < 0; i++) {
 			var randowNum = Math.ceil(Math.random() * (this.__cards.length - 1));
 			this.__centerCard.push(this.__cards.splice(randowNum, 1)[0]);
 		}
@@ -40,7 +40,7 @@ var sceneBegin = {
 			$(".scene-center").append(cardData.__$wrapper);
 		})
 	},
-	processQueue: function() {
+	_processQueue: function() {
 		var that = this,
 			tempObj = {};
 		this.__allCards.forEach(function(card) {
@@ -60,34 +60,20 @@ var sceneBegin = {
 	},
 };
 var sceneAction = {
-	centerCardShowFlag: function(arr, flag, callback) {
+	cardShowFlag: function(arr, flag, callback) {
 		arr.forEach(function(card) {
 			card.setShow(flag);
 			callback && callback(card);
 		})
 	},
-	centerCardCanShow: function(num) {
+	cardCanShow: function(num,arr) {
 		var that = this,
 			index = 0;
-		this.centerCardShowFlag(this.__centerCard, true, function(card) {
+		this.cardShowFlag(arr, true, function(card) {
 			card.setShowCallback(function() {
 				index++;
 				if (index == num) {
-					that.centerCardShowFlag(that.__centerCard, false, function(card) {
-						card.setShowCallback("");
-					});
-				}
-			});
-		})
-	},
-	mainCardCanShow: function(num) {
-		var that = this,
-			index = 0;
-		this.centerCardShowFlag(this.__cards, true, function(card) {
-			card.setShowCallback(function() {
-				index++;
-				if (index == num) {
-					that.centerCardShowFlag(that.__cards, false, function(card) {
+					that.cardShowFlag(arr, false, function(card) {
 						card.setShowCallback("");
 					});
 				}
@@ -102,19 +88,21 @@ var sceneAction = {
 	},
 	wolfPower: function() {
 		if (this.__curCard.length == 1) {
-			this.centerCardCanShow(1);
+			this.cardCanShow(1,this.__centerCard);
 		}
 	},
 	seerPower: function() {
-		debugger;
-		this.mainCardCanShow(1);
+		this.cardCanShow(2,this.__centerCard);
+	},
+	minionPower:function(){
+		var wolfs = this._getCardsByName("Wolf");
+		wolfs.forEach(function(card){
+			card.show();
+		});
 	}
 };
 $.extend(Scene.prototype, sceneBegin, sceneAction, {
-	_setCurCard: function(card) {
-		this.__curCard.push(card);
-	},
-	_emptyCurCard: function() {
+	_initAllCard: function() {
 		this.__allCards.forEach(function(card) {
 			card.setShow(false);
 			card.hide();
@@ -122,13 +110,13 @@ $.extend(Scene.prototype, sceneBegin, sceneAction, {
 		this.__curCard = [];
 	},
 	_process: function() {
-		this._emptyCurCard();
+		this._initAllCard();
 		if (this.cindex < this.__pQueue.length) {
 			var that = this,
 				cd = this.__pQueue[this.cindex];
 			var curCards = this._getCardsByName(cd.name);
 			curCards.forEach(function(card) {
-				that._setCurCard(card);
+				that.__curCard.push(card);
 				card.show();
 			});
 			this.actionCenter();
@@ -151,4 +139,16 @@ $.extend(Scene.prototype, sceneBegin, sceneAction, {
 		})
 	}
 })
-new Scene([new Card(new Wolf()), new Card(new Wolf()), new Card(new Seer()), new Card(new Villager()), new Card(new Villager()), new Card(new Villager())]);
+new Scene([
+	new Card(new Wolf()),
+	new Card(new Wolf()),
+	new Card(new Minion()),
+	new Card(new Seer()),
+	new Card(new Villager()),
+	new Card(new Villager())
+]);
+
+
+
+
+
