@@ -9,6 +9,9 @@ Role.prototype = {
 	getMultly: function() {
 		return !!this.__multly;
 	},
+	getDescription: function() {
+		return this.__description;
+	},
 	setCard: function(card) {
 		this.__card = card;
 	},
